@@ -1,51 +1,50 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useTextToSpeech } from '@workspace/api-client-react';
 import { useAudio } from '@/hooks/use-audio';
 
-const REMINDER_INTERVAL_MS = 20 * 60 * 1000; // 20 minutes
+const REMINDER_INTERVAL_MS = 20 * 60 * 1000;
+
+async function fetchTtsBlob(text: string): Promise<Blob> {
+  const res = await fetch('/api/wellness/tts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text }),
+  });
+  if (!res.ok) throw new Error('TTS failed');
+  return res.blob();
+}
 
 export function useWaterReminder() {
   const [isActive, setIsActive] = useState(false);
   const { toast } = useToast();
-  const ttsMutation = useTextToSpeech();
   const { playBlob } = useAudio();
-
-  const triggerReminder = useCallback(async () => {
-    toast({
-      title: "💧 Time to hydrate!",
-      description: "Take a sip of water to stay fresh and focused.",
-      duration: 5000,
-    });
-
-    try {
-      const audioBlob = await ttsMutation.mutateAsync({
-        data: { text: "It's time to drink some water. Stay hydrated!" }
-      });
-      playBlob(audioBlob);
-    } catch (e) {
-      console.error("Failed to fetch/play water reminder audio", e);
-    }
-  }, [toast, ttsMutation, playBlob]);
+  const isActiveRef = useRef(isActive);
+  isActiveRef.current = isActive;
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    if (!isActive) return;
 
-    if (isActive) {
-      // Set interval for every 20 mins
-      interval = setInterval(triggerReminder, REMINDER_INTERVAL_MS);
-      
-      // Initial toast to confirm activation
+    toast({
+      title: '💧 Water Reminders Active',
+      description: "We'll remind you to hydrate every 20 minutes.",
+    });
+
+    const interval = setInterval(async () => {
       toast({
-        title: "Water Reminders Active",
-        description: "We'll remind you to hydrate every 20 minutes.",
+        title: '💧 Time to hydrate!',
+        description: 'Take a sip of water to stay fresh and focused.',
+        duration: 5000,
       });
-    }
+      try {
+        const blob = await fetchTtsBlob("It's time to drink some water. Stay hydrated!");
+        playBlob(blob);
+      } catch (e) {
+        console.error('Water reminder TTS failed', e);
+      }
+    }, REMINDER_INTERVAL_MS);
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isActive, triggerReminder, toast]);
+    return () => clearInterval(interval);
+  }, [isActive]); // intentionally omit toast/playBlob — they are stable refs
 
   const toggle = () => setIsActive(prev => !prev);
 
