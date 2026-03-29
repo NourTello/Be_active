@@ -5,18 +5,30 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  FoodImageAnalysisRequest,
+  FoodImageAnalysisResponse,
+  FoodRecommendationRequest,
+  FoodRecommendationResponse,
+  HealthStatus,
+  SportRecommendationRequest,
+  SportRecommendationResponse,
+  TtsRequest,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -99,3 +111,355 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Get sport recommendation based on BMI and health profile
+ */
+export const getGetSportRecommendationUrl = () => {
+  return `/api/wellness/sport-recommendation`;
+};
+
+export const getSportRecommendation = async (
+  sportRecommendationRequest: SportRecommendationRequest,
+  options?: RequestInit,
+): Promise<SportRecommendationResponse> => {
+  return customFetch<SportRecommendationResponse>(
+    getGetSportRecommendationUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(sportRecommendationRequest),
+    },
+  );
+};
+
+export const getGetSportRecommendationMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof getSportRecommendation>>,
+    TError,
+    { data: BodyType<SportRecommendationRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof getSportRecommendation>>,
+  TError,
+  { data: BodyType<SportRecommendationRequest> },
+  TContext
+> => {
+  const mutationKey = ["getSportRecommendation"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof getSportRecommendation>>,
+    { data: BodyType<SportRecommendationRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return getSportRecommendation(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GetSportRecommendationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof getSportRecommendation>>
+>;
+export type GetSportRecommendationMutationBody =
+  BodyType<SportRecommendationRequest>;
+export type GetSportRecommendationMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Get sport recommendation based on BMI and health profile
+ */
+export const useGetSportRecommendation = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof getSportRecommendation>>,
+    TError,
+    { data: BodyType<SportRecommendationRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof getSportRecommendation>>,
+  TError,
+  { data: BodyType<SportRecommendationRequest> },
+  TContext
+> => {
+  return useMutation(getGetSportRecommendationMutationOptions(options));
+};
+
+/**
+ * @summary Get food recommendation based on sport and target weight
+ */
+export const getGetFoodRecommendationUrl = () => {
+  return `/api/wellness/food-recommendation`;
+};
+
+export const getFoodRecommendation = async (
+  foodRecommendationRequest: FoodRecommendationRequest,
+  options?: RequestInit,
+): Promise<FoodRecommendationResponse> => {
+  return customFetch<FoodRecommendationResponse>(
+    getGetFoodRecommendationUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(foodRecommendationRequest),
+    },
+  );
+};
+
+export const getGetFoodRecommendationMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof getFoodRecommendation>>,
+    TError,
+    { data: BodyType<FoodRecommendationRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof getFoodRecommendation>>,
+  TError,
+  { data: BodyType<FoodRecommendationRequest> },
+  TContext
+> => {
+  const mutationKey = ["getFoodRecommendation"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof getFoodRecommendation>>,
+    { data: BodyType<FoodRecommendationRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return getFoodRecommendation(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GetFoodRecommendationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof getFoodRecommendation>>
+>;
+export type GetFoodRecommendationMutationBody =
+  BodyType<FoodRecommendationRequest>;
+export type GetFoodRecommendationMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Get food recommendation based on sport and target weight
+ */
+export const useGetFoodRecommendation = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof getFoodRecommendation>>,
+    TError,
+    { data: BodyType<FoodRecommendationRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof getFoodRecommendation>>,
+  TError,
+  { data: BodyType<FoodRecommendationRequest> },
+  TContext
+> => {
+  return useMutation(getGetFoodRecommendationMutationOptions(options));
+};
+
+/**
+ * @summary Analyze food image and estimate calories
+ */
+export const getAnalyzeFoodImageUrl = () => {
+  return `/api/wellness/analyze-food-image`;
+};
+
+export const analyzeFoodImage = async (
+  foodImageAnalysisRequest: FoodImageAnalysisRequest,
+  options?: RequestInit,
+): Promise<FoodImageAnalysisResponse> => {
+  return customFetch<FoodImageAnalysisResponse>(getAnalyzeFoodImageUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(foodImageAnalysisRequest),
+  });
+};
+
+export const getAnalyzeFoodImageMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeFoodImage>>,
+    TError,
+    { data: BodyType<FoodImageAnalysisRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof analyzeFoodImage>>,
+  TError,
+  { data: BodyType<FoodImageAnalysisRequest> },
+  TContext
+> => {
+  const mutationKey = ["analyzeFoodImage"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof analyzeFoodImage>>,
+    { data: BodyType<FoodImageAnalysisRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return analyzeFoodImage(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AnalyzeFoodImageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof analyzeFoodImage>>
+>;
+export type AnalyzeFoodImageMutationBody = BodyType<FoodImageAnalysisRequest>;
+export type AnalyzeFoodImageMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Analyze food image and estimate calories
+ */
+export const useAnalyzeFoodImage = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeFoodImage>>,
+    TError,
+    { data: BodyType<FoodImageAnalysisRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof analyzeFoodImage>>,
+  TError,
+  { data: BodyType<FoodImageAnalysisRequest> },
+  TContext
+> => {
+  return useMutation(getAnalyzeFoodImageMutationOptions(options));
+};
+
+/**
+ * @summary Convert text to speech audio
+ */
+export const getTextToSpeechUrl = () => {
+  return `/api/wellness/tts`;
+};
+
+export const textToSpeech = async (
+  ttsRequest: TtsRequest,
+  options?: RequestInit,
+): Promise<Blob> => {
+  return customFetch<Blob>(getTextToSpeechUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(ttsRequest),
+  });
+};
+
+export const getTextToSpeechMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof textToSpeech>>,
+    TError,
+    { data: BodyType<TtsRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof textToSpeech>>,
+  TError,
+  { data: BodyType<TtsRequest> },
+  TContext
+> => {
+  const mutationKey = ["textToSpeech"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof textToSpeech>>,
+    { data: BodyType<TtsRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return textToSpeech(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type TextToSpeechMutationResult = NonNullable<
+  Awaited<ReturnType<typeof textToSpeech>>
+>;
+export type TextToSpeechMutationBody = BodyType<TtsRequest>;
+export type TextToSpeechMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Convert text to speech audio
+ */
+export const useTextToSpeech = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof textToSpeech>>,
+    TError,
+    { data: BodyType<TtsRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof textToSpeech>>,
+  TError,
+  { data: BodyType<TtsRequest> },
+  TContext
+> => {
+  return useMutation(getTextToSpeechMutationOptions(options));
+};

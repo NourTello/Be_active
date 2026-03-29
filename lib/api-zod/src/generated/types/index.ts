@@ -6,4 +6,18 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./detectedFood";
+export * from "./foodImageAnalysisRequest";
+export * from "./foodImageAnalysisResponse";
+export * from "./foodItem";
+export * from "./foodRecommendationRequest";
+export * from "./foodRecommendationRequestGender";
+export * from "./foodRecommendationResponse";
 export * from "./healthStatus";
+export * from "./mealPlan";
+export * from "./sportRecommendation";
+export * from "./sportRecommendationIntensity";
+export * from "./sportRecommendationRequest";
+export * from "./sportRecommendationRequestGender";
+export * from "./sportRecommendationResponse";
+export * from "./ttsRequest";

@@ -8,3 +8,116 @@
 export interface HealthStatus {
   status: string;
 }
+
+export type SportRecommendationRequestGender =
+  (typeof SportRecommendationRequestGender)[keyof typeof SportRecommendationRequestGender];
+
+export const SportRecommendationRequestGender = {
+  male: "male",
+  female: "female",
+  other: "other",
+} as const;
+
+export interface SportRecommendationRequest {
+  /** Weight in kg */
+  weight: number;
+  /** Height in cm */
+  height: number;
+  age: number;
+  gender: SportRecommendationRequestGender;
+  /** List of health conditions */
+  healthIssues?: string[];
+  /** e.g. lose weight, build muscle, stay active */
+  fitnessGoal?: string;
+}
+
+export type SportRecommendationIntensity =
+  (typeof SportRecommendationIntensity)[keyof typeof SportRecommendationIntensity];
+
+export const SportRecommendationIntensity = {
+  low: "low",
+  moderate: "moderate",
+  high: "high",
+} as const;
+
+export interface SportRecommendation {
+  sport: string;
+  description: string;
+  /** Recommended session duration in minutes */
+  duration: number;
+  intensity: SportRecommendationIntensity;
+  benefits: string[];
+}
+
+export interface SportRecommendationResponse {
+  bmi: number;
+  bmiCategory: string;
+  recommendations: SportRecommendation[];
+  cautions: string[];
+}
+
+export type FoodRecommendationRequestGender =
+  (typeof FoodRecommendationRequestGender)[keyof typeof FoodRecommendationRequestGender];
+
+export const FoodRecommendationRequestGender = {
+  male: "male",
+  female: "female",
+  other: "other",
+} as const;
+
+export interface FoodRecommendationRequest {
+  sport: string;
+  currentWeight: number;
+  targetWeight: number;
+  height: number;
+  age: number;
+  gender: FoodRecommendationRequestGender;
+  healthIssues?: string[];
+}
+
+export interface FoodItem {
+  name: string;
+  portion: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  benefits: string;
+}
+
+export interface MealPlan {
+  /** e.g. breakfast, lunch, dinner, snack */
+  mealType: string;
+  foods: FoodItem[];
+}
+
+export interface FoodRecommendationResponse {
+  dailyCalorieTarget: number;
+  meals: MealPlan[];
+  tips: string[];
+}
+
+export interface FoodImageAnalysisRequest {
+  /** Base64 encoded image data */
+  imageBase64: string;
+}
+
+export interface DetectedFood {
+  name: string;
+  estimatedPortion: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+export interface FoodImageAnalysisResponse {
+  foods: DetectedFood[];
+  totalCalories: number;
+  confidence: string;
+  advice: string;
+}
+
+export interface TtsRequest {
+  text: string;
+}

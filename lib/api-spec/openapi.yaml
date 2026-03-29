@@ -1,6 +1,5 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
   description: API specification
@@ -10,6 +9,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: wellness
+    description: Wellness recommendations and AI features
 paths:
   /healthz:
     get:
@@ -24,6 +25,79 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /wellness/sport-recommendation:
+    post:
+      operationId: getSportRecommendation
+      tags: [wellness]
+      summary: Get sport recommendation based on BMI and health profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SportRecommendationRequest"
+      responses:
+        "200":
+          description: Sport recommendation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SportRecommendationResponse"
+  /wellness/food-recommendation:
+    post:
+      operationId: getFoodRecommendation
+      tags: [wellness]
+      summary: Get food recommendation based on sport and target weight
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FoodRecommendationRequest"
+      responses:
+        "200":
+          description: Food recommendation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodRecommendationResponse"
+  /wellness/analyze-food-image:
+    post:
+      operationId: analyzeFoodImage
+      tags: [wellness]
+      summary: Analyze food image and estimate calories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FoodImageAnalysisRequest"
+      responses:
+        "200":
+          description: Food image analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodImageAnalysisResponse"
+  /wellness/tts:
+    post:
+      operationId: textToSpeech
+      tags: [wellness]
+      summary: Convert text to speech audio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TtsRequest"
+      responses:
+        "200":
+          description: Audio file
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
 components:
   schemas:
     HealthStatus:
@@ -33,4 +107,210 @@ components:
           type: string
       required:
         - status
-
+    SportRecommendationRequest:
+      type: object
+      properties:
+        weight:
+          type: number
+          description: Weight in kg
+        height:
+          type: number
+          description: Height in cm
+        age:
+          type: number
+        gender:
+          type: string
+          enum: [male, female, other]
+        healthIssues:
+          type: array
+          items:
+            type: string
+          description: List of health conditions
+        fitnessGoal:
+          type: string
+          description: e.g. lose weight, build muscle, stay active
+      required:
+        - weight
+        - height
+        - age
+        - gender
+    SportRecommendationResponse:
+      type: object
+      properties:
+        bmi:
+          type: number
+        bmiCategory:
+          type: string
+        recommendations:
+          type: array
+          items:
+            $ref: "#/components/schemas/SportRecommendation"
+        cautions:
+          type: array
+          items:
+            type: string
+      required:
+        - bmi
+        - bmiCategory
+        - recommendations
+        - cautions
+    SportRecommendation:
+      type: object
+      properties:
+        sport:
+          type: string
+        description:
+          type: string
+        duration:
+          type: number
+          description: Recommended session duration in minutes
+        intensity:
+          type: string
+          enum: [low, moderate, high]
+        benefits:
+          type: array
+          items:
+            type: string
+      required:
+        - sport
+        - description
+        - duration
+        - intensity
+        - benefits
+    FoodRecommendationRequest:
+      type: object
+      properties:
+        sport:
+          type: string
+        currentWeight:
+          type: number
+        targetWeight:
+          type: number
+        height:
+          type: number
+        age:
+          type: number
+        gender:
+          type: string
+          enum: [male, female, other]
+        healthIssues:
+          type: array
+          items:
+            type: string
+      required:
+        - sport
+        - currentWeight
+        - targetWeight
+        - height
+        - age
+        - gender
+    FoodRecommendationResponse:
+      type: object
+      properties:
+        dailyCalorieTarget:
+          type: number
+        meals:
+          type: array
+          items:
+            $ref: "#/components/schemas/MealPlan"
+        tips:
+          type: array
+          items:
+            type: string
+      required:
+        - dailyCalorieTarget
+        - meals
+        - tips
+    MealPlan:
+      type: object
+      properties:
+        mealType:
+          type: string
+          description: e.g. breakfast, lunch, dinner, snack
+        foods:
+          type: array
+          items:
+            $ref: "#/components/schemas/FoodItem"
+      required:
+        - mealType
+        - foods
+    FoodItem:
+      type: object
+      properties:
+        name:
+          type: string
+        portion:
+          type: string
+        calories:
+          type: number
+        protein:
+          type: number
+        carbs:
+          type: number
+        fat:
+          type: number
+        benefits:
+          type: string
+      required:
+        - name
+        - portion
+        - calories
+        - protein
+        - carbs
+        - fat
+        - benefits
+    FoodImageAnalysisRequest:
+      type: object
+      properties:
+        imageBase64:
+          type: string
+          description: Base64 encoded image data
+      required:
+        - imageBase64
+    FoodImageAnalysisResponse:
+      type: object
+      properties:
+        foods:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetectedFood"
+        totalCalories:
+          type: number
+        confidence:
+          type: string
+        advice:
+          type: string
+      required:
+        - foods
+        - totalCalories
+        - confidence
+        - advice
+    DetectedFood:
+      type: object
+      properties:
+        name:
+          type: string
+        estimatedPortion:
+          type: string
+        calories:
+          type: number
+        protein:
+          type: number
+        carbs:
+          type: number
+        fat:
+          type: number
+      required:
+        - name
+        - estimatedPortion
+        - calories
+        - protein
+        - carbs
+        - fat
+    TtsRequest:
+      type: object
+      properties:
+        text:
+          type: string
+      required:
+        - text

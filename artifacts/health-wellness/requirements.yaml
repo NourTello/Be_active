@@ -1,0 +1,23 @@
+packages:
+  "framer-motion": "For smooth transitions and layout animations"
+  "react-hook-form": "For robust form state management"
+  "@hookform/resolvers": "For integrating Zod validation with forms"
+  "date-fns": "For formatting time in the timer"
+  "canvas-confetti": "For celebration effect when a workout is completed"
+  "@types/canvas-confetti": "Types for canvas-confetti"
+
+images:
+  - path: "artifacts/health-wellness/public/images/hero-bg.png"
+    description: "Abstract fresh energetic gradient mesh background in vibrant mint greens, teals, and soft blues with organic fluid shapes"
+    aspect_ratio: "16:9"
+  - path: "artifacts/health-wellness/public/images/sport-illustration.png"
+    description: "Minimalist modern flat illustration of a person doing a dynamic workout, using vibrant green and blue tones with soft shadows"
+    aspect_ratio: "1:1"
+  - path: "artifacts/health-wellness/public/images/food-illustration.png"
+    description: "Minimalist modern flat illustration of healthy fresh food, a vibrant salad bowl, using green, orange and yellow tones"
+    aspect_ratio: "1:1"
+
+notes:
+  - Using generated hooks from @workspace/api-client-react
+  - TTS endpoint returns raw binary audio which is played via Web Audio API
+  - File input used for camera with capture="environment" for best mobile compatibility

@@ -1,3 +1,38 @@
+# Health & Wellness App
+
+## Overview
+
+Full-stack health and wellness web application with AI-powered sport and nutrition recommendations.
+
+## Features
+
+### Sport Section
+- BMI calculator (weight, height, age, gender, health conditions)
+- AI sport recommendations based on BMI + health profile (via OpenAI gpt-5.2)
+- Health condition awareness (heart, diabetes, joint problems, etc.)
+- Voice workout timer with AI TTS announcements at key milestones
+- Water reminder toggle (reminds every 20 minutes)
+
+### Food Section
+- AI meal plan recommendations based on sport + target weight
+- Per-food calorie and macronutrient breakdowns
+- Camera food scanner - take a photo to estimate calories via AI vision
+
+## Key API Endpoints
+
+- `POST /api/wellness/sport-recommendation` — BMI + AI sport suggestions
+- `POST /api/wellness/food-recommendation` — Meal plan based on sport/goals
+- `POST /api/wellness/analyze-food-image` — Camera food calorie analysis
+- `POST /api/wellness/tts` — Text-to-speech for workout voice timer
+
+## AI Integration
+
+Uses Replit AI Integrations (OpenAI) — no API key required, billed to Replit credits.
+- Chat: gpt-5.2 for recommendations
+- TTS: textToSpeech helper from @workspace/integrations-openai-ai-server/audio
+
+---
+
 # Workspace
 
 ## Overview

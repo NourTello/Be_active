@@ -14,3 +14,102 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * @summary Get sport recommendation based on BMI and health profile
+ */
+export const GetSportRecommendationBody = zod.object({
+  weight: zod.number().describe("Weight in kg"),
+  height: zod.number().describe("Height in cm"),
+  age: zod.number(),
+  gender: zod.enum(["male", "female", "other"]),
+  healthIssues: zod
+    .array(zod.string())
+    .optional()
+    .describe("List of health conditions"),
+  fitnessGoal: zod
+    .string()
+    .optional()
+    .describe("e.g. lose weight, build muscle, stay active"),
+});
+
+export const GetSportRecommendationResponse = zod.object({
+  bmi: zod.number(),
+  bmiCategory: zod.string(),
+  recommendations: zod.array(
+    zod.object({
+      sport: zod.string(),
+      description: zod.string(),
+      duration: zod
+        .number()
+        .describe("Recommended session duration in minutes"),
+      intensity: zod.enum(["low", "moderate", "high"]),
+      benefits: zod.array(zod.string()),
+    }),
+  ),
+  cautions: zod.array(zod.string()),
+});
+
+/**
+ * @summary Get food recommendation based on sport and target weight
+ */
+export const GetFoodRecommendationBody = zod.object({
+  sport: zod.string(),
+  currentWeight: zod.number(),
+  targetWeight: zod.number(),
+  height: zod.number(),
+  age: zod.number(),
+  gender: zod.enum(["male", "female", "other"]),
+  healthIssues: zod.array(zod.string()).optional(),
+});
+
+export const GetFoodRecommendationResponse = zod.object({
+  dailyCalorieTarget: zod.number(),
+  meals: zod.array(
+    zod.object({
+      mealType: zod.string().describe("e.g. breakfast, lunch, dinner, snack"),
+      foods: zod.array(
+        zod.object({
+          name: zod.string(),
+          portion: zod.string(),
+          calories: zod.number(),
+          protein: zod.number(),
+          carbs: zod.number(),
+          fat: zod.number(),
+          benefits: zod.string(),
+        }),
+      ),
+    }),
+  ),
+  tips: zod.array(zod.string()),
+});
+
+/**
+ * @summary Analyze food image and estimate calories
+ */
+export const AnalyzeFoodImageBody = zod.object({
+  imageBase64: zod.string().describe("Base64 encoded image data"),
+});
+
+export const AnalyzeFoodImageResponse = zod.object({
+  foods: zod.array(
+    zod.object({
+      name: zod.string(),
+      estimatedPortion: zod.string(),
+      calories: zod.number(),
+      protein: zod.number(),
+      carbs: zod.number(),
+      fat: zod.number(),
+    }),
+  ),
+  totalCalories: zod.number(),
+  confidence: zod.string(),
+  advice: zod.string(),
+});
+
+/**
+ * @summary Convert text to speech audio
+ */
+export const TextToSpeechBody = zod.object({
+  text: zod.string(),
+});
