@@ -3,22 +3,33 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { BmiForm } from './BmiForm';
 import { WorkoutTimer } from './WorkoutTimer';
 import { useGetSportRecommendation, SportRecommendationResponse, SportRecommendation } from '@workspace/api-client-react';
-import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Flame, Timer } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Flame, Timer, Target, TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { useUserProfile, calcTargetWeight } from '@/context/UserProfileContext';
 
 export function SportSection() {
   const [recommendation, setRecommendation] = useState<SportRecommendationResponse | null>(null);
   const [activeSport, setActiveSport] = useState<SportRecommendation | null>(null);
-  
+  const [submittedWeight, setSubmittedWeight] = useState<number | null>(null);
+  const [submittedHeight, setSubmittedHeight] = useState<number | null>(null);
+
+  const { updateProfile } = useUserProfile();
   const sportMutation = useGetSportRecommendation();
 
   const handleFormSubmit = async (data: any) => {
     try {
-      const result = await sportMutation.mutateAsync({
-        data: data
-      });
+      setSubmittedWeight(data.weight);
+      setSubmittedHeight(data.height);
+      const result = await sportMutation.mutateAsync({ data });
       setRecommendation(result);
+
+      // Calculate and store the target weight in shared context
+      const tw = calcTargetWeight(data.height);
+      const bmi = data.weight / Math.pow(data.height / 100, 2);
+      // If already normal, target = current; otherwise aim for ideal (BMI 22)
+      const targetWeight = bmi >= 18.5 && bmi <= 24.9 ? data.weight : tw.ideal;
+      updateProfile({ targetWeight });
     } catch (e) {
-      console.error("Failed to get recommendation", e);
+      console.error('Failed to get recommendation', e);
     }
   };
 
@@ -86,6 +97,58 @@ export function SportSection() {
                     </div>
                   </div>
                 </div>
+
+                {/* Target Weight Card */}
+                {submittedHeight && submittedWeight && (() => {
+                  const tw = calcTargetWeight(submittedHeight);
+                  const bmi = recommendation.bmi;
+                  const isNormal = bmi >= 18.5 && bmi <= 24.9;
+                  const isUnderweight = bmi < 18.5;
+                  const diff = isNormal ? 0 : Math.round((tw.ideal - submittedWeight) * 10) / 10;
+                  const TrendIcon = isNormal ? Minus : isUnderweight ? TrendingUp : TrendingDown;
+                  const trendColor = isNormal ? 'text-primary' : isUnderweight ? 'text-blue-500' : 'text-orange-500';
+                  const bgColor = isNormal ? 'bg-primary/5 border-primary/20' : isUnderweight ? 'bg-blue-50 border-blue-200' : 'bg-orange-50 border-orange-200';
+                  return (
+                    <div className={`rounded-2xl p-5 border ${bgColor}`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Target className={`w-5 h-5 ${trendColor}`} />
+                        <h4 className={`font-bold ${trendColor}`}>Your Target Weight</h4>
+                      </div>
+                      <div className="flex flex-wrap items-end gap-4">
+                        <div>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Ideal (BMI 22)</p>
+                          <p className="text-3xl font-bold text-foreground">{tw.ideal} <span className="text-base font-normal text-muted-foreground">kg</span></p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Healthy Range</p>
+                          <p className="text-lg font-semibold text-foreground">{tw.min} – {tw.max} <span className="text-sm font-normal text-muted-foreground">kg</span></p>
+                        </div>
+                        {!isNormal && (
+                          <div className="ml-auto text-right">
+                            <p className="text-xs text-muted-foreground mb-1">To reach ideal</p>
+                            <p className={`text-xl font-bold flex items-center gap-1 ${trendColor}`}>
+                              <TrendIcon className="w-5 h-5" />
+                              {Math.abs(diff)} kg {diff < 0 ? 'to lose' : 'to gain'}
+                            </p>
+                          </div>
+                        )}
+                        {isNormal && (
+                          <div className="ml-auto text-right">
+                            <p className="text-xs text-muted-foreground mb-1">Status</p>
+                            <p className="text-base font-bold text-primary flex items-center gap-1"><Minus className="w-4 h-4" /> Already at goal!</p>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        {isNormal
+                          ? 'Great news — your weight is already within the healthy BMI range. Focus on maintaining it.'
+                          : isUnderweight
+                          ? `You need to gain ${Math.abs(diff)} kg to reach an ideal BMI of 22. Focus on strength and nutrition.`
+                          : `You need to lose ${Math.abs(diff)} kg to reach an ideal BMI of 22. This is pre-filled in your nutrition plan.`}
+                      </p>
+                    </div>
+                  );
+                })()}
 
                 {/* Cautions */}
                 {recommendation.cautions.length > 0 && (

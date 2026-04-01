@@ -7,6 +7,7 @@ export interface UserProfile {
   age: number | '';
   gender: SportRecommendationRequestGender | '';
   healthIssues: string[];
+  targetWeight: number | '';
 }
 
 interface UserProfileContextType {
@@ -20,6 +21,7 @@ const defaultProfile: UserProfile = {
   age: '',
   gender: '',
   healthIssues: [],
+  targetWeight: '',
 };
 
 const UserProfileContext = createContext<UserProfileContextType | undefined>(undefined);
@@ -44,4 +46,14 @@ export function useUserProfile() {
     throw new Error('useUserProfile must be used within a UserProfileProvider');
   }
   return context;
+}
+
+/** Calculate ideal target weight range for a normal BMI (18.5–24.9) */
+export function calcTargetWeight(heightCm: number): { min: number; max: number; ideal: number } {
+  const h = heightCm / 100;
+  return {
+    min: Math.round(18.5 * h * h * 10) / 10,
+    max: Math.round(24.9 * h * h * 10) / 10,
+    ideal: Math.round(22.0 * h * h * 10) / 10,
+  };
 }
