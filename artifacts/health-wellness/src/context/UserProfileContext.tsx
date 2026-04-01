@@ -8,6 +8,7 @@ export interface UserProfile {
   gender: SportRecommendationRequestGender | '';
   healthIssues: string[];
   targetWeight: number | '';
+  isTraining: boolean;
 }
 
 interface UserProfileContextType {
@@ -22,6 +23,7 @@ const defaultProfile: UserProfile = {
   gender: '',
   healthIssues: [],
   targetWeight: '',
+  isTraining: false,
 };
 
 const UserProfileContext = createContext<UserProfileContextType | undefined>(undefined);

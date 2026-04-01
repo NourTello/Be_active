@@ -4,6 +4,7 @@ import { Play, Pause, Square, Volume2, Loader2, Droplets } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { SportRecommendation } from '@workspace/api-client-react';
 import { useAudio } from '@/hooks/use-audio';
+import { useUserProfile } from '@/context/UserProfileContext';
 
 interface WorkoutTimerProps {
   sport: SportRecommendation;
@@ -31,6 +32,7 @@ export function WorkoutTimer({ sport, onClose }: WorkoutTimerProps) {
   const [waterCount, setWaterCount] = useState(0);
 
   const { playBlob } = useAudio();
+  const { updateProfile } = useUserProfile();
   const playedMilestones = useRef(new Set<string>());
 
   const playAnnouncement = useCallback(async (text: string, milestoneKey: string) => {
@@ -73,6 +75,7 @@ export function WorkoutTimer({ sport, onClose }: WorkoutTimerProps) {
       playAnnouncement(`Great job! Your ${sport.sport} workout is complete!`, 'end');
       confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#3b82f6', '#f97316'] });
       setIsActive(false);
+      updateProfile({ isTraining: false });
     }
 
     // Water reminder every 10 minutes of elapsed exercise time
@@ -88,6 +91,7 @@ export function WorkoutTimer({ sport, onClose }: WorkoutTimerProps) {
   const toggleTimer = () => {
     const starting = !isActive;
     setIsActive(starting);
+    updateProfile({ isTraining: starting });
     if (starting && timeLeft === defaultDurationSeconds) {
       playAnnouncement(`Your ${sport.sport} workout begins now! Let's go!`, 'start');
     }
@@ -95,6 +99,7 @@ export function WorkoutTimer({ sport, onClose }: WorkoutTimerProps) {
 
   const resetTimer = () => {
     setIsActive(false);
+    updateProfile({ isTraining: false });
     setTimeLeft(defaultDurationSeconds);
     setShowWaterAlert(false);
     setWaterCount(0);
@@ -150,7 +155,7 @@ export function WorkoutTimer({ sport, onClose }: WorkoutTimerProps) {
             </span>
             {isTTSLoading && <Loader2 className="w-4 h-4 text-green-400 animate-spin" />}
           </div>
-          <button onClick={onClose} className="text-white/60 hover:text-white transition-colors text-sm">
+          <button onClick={() => { updateProfile({ isTraining: false }); onClose(); }} className="text-white/60 hover:text-white transition-colors text-sm">
             ✕ Close
           </button>
         </div>

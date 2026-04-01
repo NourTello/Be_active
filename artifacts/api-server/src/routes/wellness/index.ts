@@ -176,7 +176,7 @@ router.post("/wellness/analyze-food-image", async (req, res) => {
             },
             {
               type: "text",
-              text: `Analyze this food image and identify all food items visible. For each food, estimate calories and macronutrients.
+              text: `Analyze this food image and identify all food items visible. For each food, estimate calories, macronutrients and list the main ingredients.
 
 Respond ONLY with valid JSON (no markdown) in this exact format:
 {
@@ -187,15 +187,15 @@ Respond ONLY with valid JSON (no markdown) in this exact format:
       "calories": 350,
       "protein": 15,
       "carbs": 45,
-      "fat": 10
+      "fat": 10,
+      "ingredients": ["ingredient1", "ingredient2", "ingredient3"]
     }
   ],
   "totalCalories": 450,
-  "confidence": "high|medium|low",
   "advice": "brief nutritional advice about this meal"
 }
 
-Be realistic with portions and calorie estimates. If you cannot identify specific foods clearly, still provide best estimates.`,
+Be realistic with portions and calorie estimates. Always include 3-6 main ingredients per food item. If you cannot identify specific foods clearly, still provide best estimates.`,
             },
           ],
         },

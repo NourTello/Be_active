@@ -63,7 +63,7 @@ export function SportSection() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="h-full min-h-[400px] rounded-3xl border-2 border-dashed border-border flex flex-col items-center justify-center p-8 text-center bg-white/50"
+                className="h-full min-h-[400px] rounded-3xl border-2 border-dashed border-border flex flex-col items-center justify-center p-8 text-center bg-card/50"
               >
                 <img 
                   src={`${import.meta.env.BASE_URL}images/sport-illustration.png`} 
@@ -82,7 +82,7 @@ export function SportSection() {
                 className="space-y-6"
               >
                 {/* BMI Card */}
-                <div className="bg-white rounded-3xl p-6 shadow-xl shadow-black/5 border border-border flex flex-col sm:flex-row items-center gap-6">
+                <div className="bg-card rounded-3xl p-6 shadow-xl shadow-black/5 border border-border flex flex-col sm:flex-row items-center gap-6">
                   <div className="w-32 h-32 rounded-full border-8 border-muted flex items-center justify-center relative">
                     <div className="absolute inset-0 rounded-full border-8 border-primary/20" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)' }} />
                     <div className="text-center">
@@ -175,7 +175,7 @@ export function SportSection() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.1 }}
                       key={idx}
-                      className="group bg-white rounded-2xl p-6 shadow-md shadow-black/5 border border-border hover:shadow-xl hover:border-primary/30 transition-all cursor-pointer"
+                      className="group bg-card rounded-2xl p-6 shadow-md shadow-black/5 border border-border hover:shadow-xl hover:border-primary/30 transition-all cursor-pointer"
                       onClick={() => setActiveSport(rec)}
                     >
                       <div className="flex justify-between items-start mb-4">

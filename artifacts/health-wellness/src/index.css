@@ -107,6 +107,42 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / 1);
 }
 
+.dark {
+  --background: 222 47% 8%;
+  --foreground: 210 40% 95%;
+
+  --card: 222 47% 11%;
+  --card-foreground: 210 40% 95%;
+  --card-border: 215 25% 20%;
+
+  --popover: 222 47% 11%;
+  --popover-foreground: 210 40% 95%;
+  --popover-border: 215 25% 20%;
+
+  --primary: 164 86% 45%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 210 100% 55%;
+  --secondary-foreground: 0 0% 100%;
+
+  --accent: 24 100% 62%;
+  --accent-foreground: 0 0% 100%;
+
+  --muted: 215 25% 18%;
+  --muted-foreground: 215 16% 60%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 215 25% 20%;
+  --input: 215 25% 20%;
+  --ring: 164 86% 45%;
+}
+
+.dark .glass {
+  @apply bg-slate-900/80 backdrop-blur-lg border border-white/10 shadow-xl shadow-black/20;
+}
+
 @layer base {
   * {
     @apply border-border;
