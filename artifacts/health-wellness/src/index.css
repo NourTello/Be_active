@@ -57,39 +57,39 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  /* Health & Wellness Palette - Vibrant Greens & Blues */
-  --background: 160 20% 98%; /* Very pale mint */
-  --foreground: 222 47% 11%;
-  
+  /* Be Active Palette – Natural Green & Warm Orange */
+  --background: 36 30% 97%; /* Warm cream */
+  --foreground: 30 20% 12%;
+
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --card-border: 160 15% 90%;
+  --card-foreground: 30 20% 12%;
+  --card-border: 36 20% 88%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --popover-border: 160 15% 90%;
+  --popover-foreground: 30 20% 12%;
+  --popover-border: 36 20% 88%;
 
-  /* Primary: Vibrant Teal/Mint */
-  --primary: 164 86% 45%; 
+  /* Primary: Natural Green */
+  --primary: 133 55% 38%;
   --primary-foreground: 0 0% 100%;
 
-  /* Secondary: Fresh Blue */
-  --secondary: 210 100% 55%;
+  /* Secondary: Warm Olive Green */
+  --secondary: 90 40% 42%;
   --secondary-foreground: 0 0% 100%;
 
-  /* Accent: Energetic Orange/Coral */
-  --accent: 24 100% 62%;
+  /* Accent: Warm Orange / Amber */
+  --accent: 36 92% 54%;
   --accent-foreground: 0 0% 100%;
 
-  --muted: 160 15% 94%;
-  --muted-foreground: 215 16% 47%;
+  --muted: 36 20% 93%;
+  --muted-foreground: 30 10% 50%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 160 15% 90%;
-  --input: 160 15% 90%;
-  --ring: 164 86% 45%;
+  --border: 36 20% 88%;
+  --input: 36 20% 88%;
+  --ring: 133 55% 38%;
 
   --radius: 1rem;
   

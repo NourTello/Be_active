@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -6,7 +5,6 @@ import { motion } from 'framer-motion';
 import { Activity, Calculator, Heart, Scale } from 'lucide-react';
 import { useUserProfile } from '@/context/UserProfileContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { SportRecommendationRequestGender } from '@workspace/api-client-react';
 
 const healthIssueOptions = [
   'Heart Condition', 'Diabetes', 'Joint Problems',
@@ -17,7 +15,6 @@ const healthIssueOptions = [
 const formSchema = z.object({
   weight: z.coerce.number().min(30, 'Weight seems too low').max(300, 'Weight seems too high'),
   height: z.coerce.number().min(100, 'Height seems too low').max(250, 'Height seems too high'),
-  age: z.coerce.number().min(12, 'Must be at least 12').max(120, 'Age seems too high'),
   gender: z.enum(['male', 'female', 'other'] as const),
   healthIssues: z.array(z.string()).default([]),
   fitnessGoal: z.string().optional(),
@@ -39,7 +36,6 @@ export function BmiForm({ onSubmit, isLoading }: BmiFormProps) {
     defaultValues: {
       weight: profile.weight || undefined,
       height: profile.height || undefined,
-      age: profile.age || undefined,
       gender: profile.gender || undefined,
       healthIssues: profile.healthIssues || [],
       fitnessGoal: 'stay active',
@@ -52,7 +48,6 @@ export function BmiForm({ onSubmit, isLoading }: BmiFormProps) {
     updateProfile({
       weight: data.weight,
       height: data.height,
-      age: data.age,
       gender: data.gender,
       healthIssues: data.healthIssues,
     });
@@ -110,34 +105,23 @@ export function BmiForm({ onSubmit, isLoading }: BmiFormProps) {
             />
             {errors.height && <p className="text-destructive text-xs font-medium">{errors.height.message}</p>}
           </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-foreground">{t.age}</label>
-            <input
-              {...register('age')}
-              type="number"
-              className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none text-foreground"
-              placeholder="e.g. 30"
-            />
-            {errors.age && <p className="text-destructive text-xs font-medium">{errors.age.message}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-foreground">{t.gender}</label>
-            <select
-              {...register('gender')}
-              className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none appearance-none text-foreground"
-            >
-              <option value="">{t.selectGender}</option>
-              <option value="male">{t.male}</option>
-              <option value="female">{t.female}</option>
-              <option value="other">{t.other}</option>
-            </select>
-            {errors.gender && <p className="text-destructive text-xs font-medium">{errors.gender.message}</p>}
-          </div>
         </div>
 
-        <div className="space-y-3 pt-4">
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-foreground">{t.gender}</label>
+          <select
+            {...register('gender')}
+            className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none appearance-none text-foreground"
+          >
+            <option value="">{t.selectGender}</option>
+            <option value="male">{t.male}</option>
+            <option value="female">{t.female}</option>
+            <option value="other">{t.other}</option>
+          </select>
+          {errors.gender && <p className="text-destructive text-xs font-medium">{errors.gender.message}</p>}
+        </div>
+
+        <div className="space-y-3">
           <label className="text-sm font-semibold text-foreground flex items-center gap-2">
             <Heart className="w-4 h-4 text-destructive" /> {t.healthIssues}
           </label>
@@ -162,7 +146,7 @@ export function BmiForm({ onSubmit, isLoading }: BmiFormProps) {
           </div>
         </div>
 
-        <div className="pt-6">
+        <div className="pt-4">
           <button
             type="submit"
             disabled={isLoading}
