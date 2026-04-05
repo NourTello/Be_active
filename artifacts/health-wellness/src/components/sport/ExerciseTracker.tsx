@@ -103,9 +103,6 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
     const { phase, isTimeBased, timerLeft, restLeft } = snap.current;
 
     if (phase === 'active' && isTimeBased && timerLeft !== null && timerLeft > 0) {
-      // Voice countdown for last 5 seconds
-      if (timerLeft <= 5) speak(String(timerLeft));
-
       if (timerLeft === 1) {
         // Last tick — complete the set
         setTimerLeft(0);
