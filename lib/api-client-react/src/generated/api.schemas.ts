@@ -29,6 +29,8 @@ export interface SportRecommendationRequest {
   healthIssues?: string[];
   /** e.g. lose weight, build muscle, stay active */
   fitnessGoal?: string;
+  /** Response language, e.g. en or ar */
+  language?: string;
 }
 
 export type SportRecommendationIntensity =
@@ -73,6 +75,8 @@ export interface FoodRecommendationRequest {
   age: number;
   gender: FoodRecommendationRequestGender;
   healthIssues?: string[];
+  /** Response language, e.g. en or ar */
+  language?: string;
 }
 
 export interface FoodItem {

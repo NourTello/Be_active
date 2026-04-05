@@ -11,7 +11,7 @@ export function FoodSection() {
   const [mealPlan, setMealPlan] = useState<FoodRecommendationResponse | null>(null);
   const [bmiError, setBmiError] = useState(false);
   const { profile } = useUserProfile();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const foodMutation = useGetFoodRecommendation();
 
   const handleFormSubmit = async (data: any) => {
@@ -23,7 +23,7 @@ export function FoodSection() {
     }
     setBmiError(false);
     try {
-      const result = await foodMutation.mutateAsync({ data });
+      const result = await foodMutation.mutateAsync({ data: { ...data, language: lang } });
       setMealPlan(result);
     } catch (error) {
       console.error('Failed to generate meal plan', error);

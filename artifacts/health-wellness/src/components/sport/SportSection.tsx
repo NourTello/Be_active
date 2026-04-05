@@ -14,14 +14,14 @@ export function SportSection() {
   const [submittedHeight, setSubmittedHeight] = useState<number | null>(null);
 
   const { updateProfile } = useUserProfile();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const sportMutation = useGetSportRecommendation();
 
   const handleFormSubmit = async (data: any) => {
     try {
       setSubmittedWeight(data.weight);
       setSubmittedHeight(data.height);
-      const result = await sportMutation.mutateAsync({ data });
+      const result = await sportMutation.mutateAsync({ data: { ...data, language: lang } });
       setRecommendation(result);
 
       // Calculate and store the target weight in shared context

@@ -13,7 +13,7 @@ const router: IRouter = Router();
 router.post("/wellness/sport-recommendation", async (req, res) => {
   try {
     const body = GetSportRecommendationBody.parse(req.body);
-    const { weight, height, age, gender, healthIssues = [], fitnessGoal } = body;
+    const { weight, height, age, gender, healthIssues = [], fitnessGoal, language } = body;
 
     const heightM = height / 100;
     const bmi = weight / (heightM * heightM);
@@ -25,7 +25,13 @@ router.post("/wellness/sport-recommendation", async (req, res) => {
     else if (bmi < 30) bmiCategory = "Overweight";
     else bmiCategory = "Obese";
 
+    const langInstruction = language === "ar"
+      ? "IMPORTANT: Respond entirely in Arabic. All sport names, descriptions, benefits, and cautions must be in Arabic."
+      : "Respond in English.";
+
     const prompt = `You are a certified fitness and health advisor. Based on the following profile, recommend 3-4 sports/exercises.
+
+${langInstruction}
 
 Profile:
 - BMI: ${bmiRounded} (${bmiCategory})
@@ -87,14 +93,20 @@ Important rules:
 router.post("/wellness/food-recommendation", async (req, res) => {
   try {
     const body = GetFoodRecommendationBody.parse(req.body);
-    const { sport, currentWeight, targetWeight, height, age, gender, healthIssues = [] } = body;
+    const { sport, currentWeight, targetWeight, height, age, gender, healthIssues = [], language } = body;
 
     const heightM = height / 100;
     const bmi = currentWeight / (heightM * heightM);
     const isLosingWeight = targetWeight < currentWeight;
     const weightDiff = Math.abs(currentWeight - targetWeight);
 
+    const foodLangInstruction = language === "ar"
+      ? "IMPORTANT: Respond entirely in Arabic. All meal types, food names, portions, benefits, and tips must be in Arabic."
+      : "Respond in English.";
+
     const prompt = `You are a certified nutritionist and sports dietitian. Create a meal plan for an athlete.
+
+${foodLangInstruction}
 
 Profile:
 - Sport: ${sport}

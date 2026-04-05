@@ -31,6 +31,7 @@ export const GetSportRecommendationBody = zod.object({
     .string()
     .optional()
     .describe("e.g. lose weight, build muscle, stay active"),
+  language: zod.string().optional().describe("Response language, e.g. en or ar"),
 });
 
 export const GetSportRecommendationResponse = zod.object({
@@ -61,6 +62,7 @@ export const GetFoodRecommendationBody = zod.object({
   age: zod.number(),
   gender: zod.enum(["male", "female", "other"]),
   healthIssues: zod.array(zod.string()).optional(),
+  language: zod.string().optional().describe("Response language, e.g. en or ar"),
 });
 
 export const GetFoodRecommendationResponse = zod.object({
