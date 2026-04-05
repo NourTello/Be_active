@@ -49,6 +49,16 @@ export const GetSportRecommendationResponse = zod.object({
     }),
   ),
   cautions: zod.array(zod.string()),
+  homeExercises: zod.array(
+    zod.object({
+      name: zod.string(),
+      description: zod.string(),
+      sets: zod.number(),
+      reps: zod.string(),
+      difficulty: zod.enum(["beginner", "intermediate", "advanced"]),
+      targetMuscles: zod.array(zod.string()),
+    }),
+  ).optional(),
 });
 
 /**

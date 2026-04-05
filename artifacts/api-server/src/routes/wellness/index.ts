@@ -29,7 +29,7 @@ router.post("/wellness/sport-recommendation", async (req, res) => {
       ? "IMPORTANT: Respond entirely in Arabic. All sport names, descriptions, benefits, and cautions must be in Arabic."
       : "Respond in English.";
 
-    const prompt = `You are a certified fitness and health advisor. Based on the following profile, recommend 3-4 sports/exercises.
+    const prompt = `You are a certified fitness and health advisor. Based on the following profile, recommend 3-4 sports/exercises AND 4-6 home exercises (no equipment needed).
 
 ${langInstruction}
 
@@ -51,7 +51,17 @@ Respond ONLY with valid JSON (no markdown, no explanation) in this exact format:
       "benefits": ["benefit1", "benefit2", "benefit3"]
     }
   ],
-  "cautions": ["caution1 if any health issues", "caution2"]
+  "cautions": ["caution1 if any health issues", "caution2"],
+  "homeExercises": [
+    {
+      "name": "exercise name",
+      "description": "how to perform it in 1-2 sentences",
+      "sets": 3,
+      "reps": "10-15",
+      "difficulty": "beginner|intermediate|advanced",
+      "targetMuscles": ["muscle1", "muscle2"]
+    }
+  ]
 }
 
 Important rules:
@@ -59,13 +69,15 @@ Important rules:
 - For joint problems: recommend swimming, cycling, yoga - avoid running
 - For high blood pressure: low to moderate intensity only
 - For diabetes: regular moderate exercise, avoid extreme intensity
-- For obesity (BMI>30): low impact activities first
-- For underweight: avoid excessive cardio, focus on strength
+- For obesity (BMI>30): low impact activities first, beginner home exercises
+- For underweight: avoid excessive cardio, focus on strength exercises
+- Home exercises must be doable at home with NO equipment
+- Adjust home exercise difficulty to match BMI and health profile
 - Be specific and helpful, include safety cautions for health issues`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-5.2",
-      max_completion_tokens: 1500,
+      max_completion_tokens: 2500,
       messages: [{ role: "user", content: prompt }],
     });
 
@@ -83,6 +95,7 @@ Important rules:
       bmiCategory,
       recommendations: parsed.recommendations ?? [],
       cautions: parsed.cautions ?? [],
+      homeExercises: parsed.homeExercises ?? [],
     });
   } catch (err) {
     req.log.error({ err }, "Error in sport recommendation");

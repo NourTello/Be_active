@@ -51,11 +51,21 @@ export interface SportRecommendation {
   benefits: string[];
 }
 
+export interface HomeExercise {
+  name: string;
+  description: string;
+  sets: number;
+  reps: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  targetMuscles: string[];
+}
+
 export interface SportRecommendationResponse {
   bmi: number;
   bmiCategory: string;
   recommendations: SportRecommendation[];
   cautions: string[];
+  homeExercises?: HomeExercise[];
 }
 
 export type FoodRecommendationRequestGender =

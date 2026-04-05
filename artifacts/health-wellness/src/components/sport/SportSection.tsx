@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { BmiForm } from './BmiForm';
 import { WorkoutTimer } from './WorkoutTimer';
 import { useGetSportRecommendation, SportRecommendationResponse, SportRecommendation } from '@workspace/api-client-react';
-import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Flame, Timer, Target, TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Flame, Timer, Target, TrendingDown, TrendingUp, Minus, Home, Dumbbell } from 'lucide-react';
 import { useUserProfile, calcTargetWeight } from '@/context/UserProfileContext';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -188,6 +188,85 @@ export function SportSection() {
                     </motion.div>
                   ))}
                 </div>
+
+                {/* Home Exercises */}
+                {recommendation.homeExercises && recommendation.homeExercises.length > 0 && (
+                  <div className="space-y-4 pt-6">
+                    <div className="flex items-center gap-3 pb-2">
+                      <div className="p-2.5 bg-accent/10 rounded-2xl text-accent">
+                        <Home className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-display font-bold text-foreground">{t.homeExercisesTitle}</h3>
+                        <p className="text-sm text-muted-foreground">{t.homeExercisesSub}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {recommendation.homeExercises.map((ex, idx) => {
+                        const diffColor =
+                          ex.difficulty === 'beginner'
+                            ? 'bg-green-100 text-green-700 border-green-200'
+                            : ex.difficulty === 'intermediate'
+                            ? 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                            : 'bg-red-100 text-red-700 border-red-200';
+                        const diffLabel =
+                          ex.difficulty === 'beginner'
+                            ? t.difficultyBeginner
+                            : ex.difficulty === 'intermediate'
+                            ? t.difficultyIntermediate
+                            : t.difficultyAdvanced;
+                        const diffEmoji =
+                          ex.difficulty === 'beginner' ? '🟢' : ex.difficulty === 'intermediate' ? '🟡' : '🔴';
+
+                        return (
+                          <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.08 }}
+                            className="bg-card rounded-2xl p-5 border border-border shadow-sm hover:shadow-md hover:border-accent/30 transition-all"
+                          >
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Dumbbell className="w-4 h-4 text-accent shrink-0" />
+                                  <h4 className="font-bold text-foreground">{ex.name}</h4>
+                                </div>
+                                <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${diffColor}`}>
+                                  {diffEmoji} {diffLabel}
+                                </span>
+                              </div>
+                            </div>
+
+                            <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{ex.description}</p>
+
+                            <div className="flex gap-3 mb-3">
+                              <div className="flex-1 text-center bg-muted/50 rounded-xl px-3 py-2.5">
+                                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">{t.sets}</p>
+                                <p className="font-display font-bold text-lg text-foreground">{ex.sets}</p>
+                              </div>
+                              <div className="flex-1 text-center bg-muted/50 rounded-xl px-3 py-2.5">
+                                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-0.5">{t.reps}</p>
+                                <p className="font-display font-bold text-lg text-foreground">{ex.reps}</p>
+                              </div>
+                            </div>
+
+                            {ex.targetMuscles && ex.targetMuscles.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5">
+                                {ex.targetMuscles.map((m, i) => (
+                                  <span key={i} className="px-2 py-0.5 bg-accent/10 text-accent rounded-full text-xs font-medium">
+                                    {m}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </motion.div>
             )}
 
