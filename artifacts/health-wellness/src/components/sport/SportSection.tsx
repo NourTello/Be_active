@@ -5,6 +5,7 @@ import { WorkoutTimer } from './WorkoutTimer';
 import { useGetSportRecommendation, SportRecommendationResponse, SportRecommendation } from '@workspace/api-client-react';
 import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Flame, Timer, Target, TrendingDown, TrendingUp, Minus } from 'lucide-react';
 import { useUserProfile, calcTargetWeight } from '@/context/UserProfileContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 export function SportSection() {
   const [recommendation, setRecommendation] = useState<SportRecommendationResponse | null>(null);
@@ -13,6 +14,7 @@ export function SportSection() {
   const [submittedHeight, setSubmittedHeight] = useState<number | null>(null);
 
   const { updateProfile } = useUserProfile();
+  const { t } = useLanguage();
   const sportMutation = useGetSportRecommendation();
 
   const handleFormSubmit = async (data: any) => {
@@ -45,8 +47,8 @@ export function SportSection() {
     <div className="space-y-8">
       {/* Introduction */}
       <div className="text-center max-w-2xl mx-auto mb-12">
-        <h2 className="text-4xl font-display font-bold text-foreground mb-4">Discover Your Perfect Activity</h2>
-        <p className="text-lg text-muted-foreground">Our AI analyzes your body metrics and health profile to recommend sports that match your capabilities and goals perfectly.</p>
+        <h2 className="text-4xl font-display font-bold text-foreground mb-4">{t.discoverActivity}</h2>
+        <p className="text-lg text-muted-foreground">{t.discoverSubtitle}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -58,23 +60,6 @@ export function SportSection() {
         {/* Results Column */}
         <div className="lg:col-span-7">
           <AnimatePresence mode="wait">
-            {!recommendation && !sportMutation.isPending && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="h-full min-h-[400px] rounded-3xl border-2 border-dashed border-border flex flex-col items-center justify-center p-8 text-center bg-card/50"
-              >
-                <img 
-                  src={`${import.meta.env.BASE_URL}images/sport-illustration.png`} 
-                  alt="Sport illustration" 
-                  className="w-64 h-64 object-contain opacity-80 mix-blend-multiply mb-6"
-                />
-                <h3 className="text-xl font-bold text-foreground mb-2">Awaiting Your Profile</h3>
-                <p className="text-muted-foreground max-w-sm">Fill out the form to get personalized, AI-driven sport recommendations tailored to your health.</p>
-              </motion.div>
-            )}
-
             {recommendation && !activeSport && (
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
@@ -91,7 +76,7 @@ export function SportSection() {
                     </div>
                   </div>
                   <div className="flex-1 text-center sm:text-left">
-                    <h3 className="text-xl font-bold mb-2">Your Body Mass Index</h3>
+                    <h3 className="text-xl font-bold mb-2">{t.yourBmi}</h3>
                     <div className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold border ${getBmiColor(recommendation.bmiCategory)}`}>
                       {recommendation.bmiCategory}
                     </div>
@@ -112,39 +97,39 @@ export function SportSection() {
                     <div className={`rounded-2xl p-5 border ${bgColor}`}>
                       <div className="flex items-center gap-2 mb-3">
                         <Target className={`w-5 h-5 ${trendColor}`} />
-                        <h4 className={`font-bold ${trendColor}`}>Your Target Weight</h4>
+                        <h4 className={`font-bold ${trendColor}`}>{t.targetWeight}</h4>
                       </div>
                       <div className="flex flex-wrap items-end gap-4">
                         <div>
-                          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Ideal (BMI 22)</p>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{t.ideal}</p>
                           <p className="text-3xl font-bold text-foreground">{tw.ideal} <span className="text-base font-normal text-muted-foreground">kg</span></p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Healthy Range</p>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{t.healthyRange}</p>
                           <p className="text-lg font-semibold text-foreground">{tw.min} – {tw.max} <span className="text-sm font-normal text-muted-foreground">kg</span></p>
                         </div>
                         {!isNormal && (
                           <div className="ml-auto text-right">
-                            <p className="text-xs text-muted-foreground mb-1">To reach ideal</p>
+                            <p className="text-xs text-muted-foreground mb-1">{t.toReachIdeal}</p>
                             <p className={`text-xl font-bold flex items-center gap-1 ${trendColor}`}>
                               <TrendIcon className="w-5 h-5" />
-                              {Math.abs(diff)} kg {diff < 0 ? 'to lose' : 'to gain'}
+                              {Math.abs(diff)} kg {diff < 0 ? t.toLose : t.toGain}
                             </p>
                           </div>
                         )}
                         {isNormal && (
                           <div className="ml-auto text-right">
                             <p className="text-xs text-muted-foreground mb-1">Status</p>
-                            <p className="text-base font-bold text-primary flex items-center gap-1"><Minus className="w-4 h-4" /> Already at goal!</p>
+                            <p className="text-base font-bold text-primary flex items-center gap-1"><Minus className="w-4 h-4" /> {t.alreadyAtGoal}</p>
                           </div>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground mt-3">
                         {isNormal
-                          ? 'Great news — your weight is already within the healthy BMI range. Focus on maintaining it.'
+                          ? t.alreadyNormal
                           : isUnderweight
-                          ? `You need to gain ${Math.abs(diff)} kg to reach an ideal BMI of 22. Focus on strength and nutrition.`
-                          : `You need to lose ${Math.abs(diff)} kg to reach an ideal BMI of 22. This is pre-filled in your nutrition plan.`}
+                          ? t.needGain.replace('{n}', String(Math.abs(diff)))
+                          : t.needLose.replace('{n}', String(Math.abs(diff)))}
                       </p>
                     </div>
                   );
@@ -154,7 +139,7 @@ export function SportSection() {
                 {recommendation.cautions.length > 0 && (
                   <div className="bg-destructive/5 border border-destructive/20 rounded-2xl p-5">
                     <h4 className="flex items-center gap-2 font-bold text-destructive mb-3">
-                      <AlertTriangle className="w-5 h-5" /> Medical Considerations
+                      <AlertTriangle className="w-5 h-5" /> {t.medicalConsiderations}
                     </h4>
                     <ul className="space-y-2">
                       {recommendation.cautions.map((caution, idx) => (
@@ -167,7 +152,7 @@ export function SportSection() {
                 )}
 
                 {/* Recommendations */}
-                <h3 className="text-2xl font-display font-bold pt-4">Recommended Activities</h3>
+                <h3 className="text-2xl font-display font-bold pt-4">{t.recommendedActivities}</h3>
                 <div className="space-y-4">
                   {recommendation.recommendations.map((rec, idx) => (
                     <motion.div 

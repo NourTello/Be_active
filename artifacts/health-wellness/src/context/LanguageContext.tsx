@@ -82,6 +82,17 @@ const translations = {
     cameraTitle: 'Camera',
     capture: 'Capture',
     cancelCamera: 'Cancel',
+    bmiLive: 'BMI',
+    healthIssueLabels: {
+      'Heart Condition': 'Heart Condition',
+      'Diabetes': 'Diabetes',
+      'Joint Problems': 'Joint Problems',
+      'High Blood Pressure': 'High Blood Pressure',
+      'Obesity': 'Obesity',
+      'Pregnancy': 'Pregnancy',
+      'Back Pain': 'Back Pain',
+      'Asthma': 'Asthma',
+    },
   },
   ar: {
     appName: 'كن نشيطاً',
@@ -162,6 +173,17 @@ const translations = {
     cameraTitle: 'الكاميرا',
     capture: 'التقاط',
     cancelCamera: 'إلغاء',
+    bmiLive: 'مؤشر كتلة الجسم',
+    healthIssueLabels: {
+      'Heart Condition': 'أمراض القلب',
+      'Diabetes': 'السكري',
+      'Joint Problems': 'مشاكل المفاصل',
+      'High Blood Pressure': 'ضغط الدم المرتفع',
+      'Obesity': 'السمنة',
+      'Pregnancy': 'الحمل',
+      'Back Pain': 'آلام الظهر',
+      'Asthma': 'الربو',
+    },
   },
 };
 

@@ -12,13 +12,13 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full glass border-b border-white/50">
-      <div className="container max-w-6xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
+      <div className="container max-w-6xl mx-auto px-4 h-24 flex items-center justify-between gap-4">
         {/* Logo only — no text */}
         <div className="flex items-center shrink-0">
           <img
             src={`${import.meta.env.BASE_URL}logo.png`}
             alt="Be Active logo"
-            className="h-16 w-16 object-contain"
+            className="h-20 w-20 object-contain drop-shadow-md"
           />
         </div>
 

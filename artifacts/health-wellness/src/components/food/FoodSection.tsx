@@ -62,23 +62,6 @@ export function FoodSection() {
         {/* Right Column: Meal Plan Results */}
         <div className="lg:col-span-8">
           <AnimatePresence mode="wait">
-            {!mealPlan && !foodMutation.isPending && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="h-full min-h-[500px] rounded-3xl border-2 border-dashed border-border flex flex-col items-center justify-center p-8 text-center bg-card/50"
-              >
-                <img
-                  src={`${import.meta.env.BASE_URL}images/food-illustration.png`}
-                  alt="Food illustration"
-                  className="w-64 h-64 object-contain opacity-80 mix-blend-multiply dark:mix-blend-normal dark:opacity-40 mb-6"
-                />
-                <h3 className="text-xl font-bold text-foreground mb-2">{t.awaitingParams}</h3>
-                <p className="text-muted-foreground max-w-sm">{t.awaitingParamsSub}</p>
-              </motion.div>
-            )}
-
             {mealPlan && (
               <motion.div
                 initial={{ opacity: 0, x: 20 }}

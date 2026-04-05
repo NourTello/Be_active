@@ -10,7 +10,7 @@ const healthIssueOptions = [
   'Heart Condition', 'Diabetes', 'Joint Problems',
   'High Blood Pressure', 'Obesity', 'Pregnancy',
   'Back Pain', 'Asthma',
-];
+] as const;
 
 const formSchema = z.object({
   weight: z.coerce.number().min(30, 'Weight seems too low').max(300, 'Weight seems too high'),
@@ -25,6 +25,13 @@ type FormData = z.infer<typeof formSchema>;
 interface BmiFormProps {
   onSubmit: (data: FormData) => void;
   isLoading: boolean;
+}
+
+function getBmiCategory(bmi: number): { label: string; color: string } {
+  if (bmi < 18.5) return { label: 'Underweight', color: 'text-blue-500 bg-blue-50 border-blue-200' };
+  if (bmi < 25) return { label: 'Normal', color: 'text-green-600 bg-green-50 border-green-200' };
+  if (bmi < 30) return { label: 'Overweight', color: 'text-orange-500 bg-orange-50 border-orange-200' };
+  return { label: 'Obese', color: 'text-red-500 bg-red-50 border-red-200' };
 }
 
 export function BmiForm({ onSubmit, isLoading }: BmiFormProps) {
@@ -43,6 +50,13 @@ export function BmiForm({ onSubmit, isLoading }: BmiFormProps) {
   });
 
   const selectedIssues = watch('healthIssues') || [];
+  const watchedWeight = watch('weight');
+  const watchedHeight = watch('height');
+
+  const liveBmi = (watchedWeight && watchedHeight && watchedHeight >= 100)
+    ? watchedWeight / Math.pow(watchedHeight / 100, 2)
+    : null;
+  const liveBmiCategory = liveBmi ? getBmiCategory(liveBmi) : null;
 
   const handleFormSubmit = (data: FormData) => {
     updateProfile({
@@ -107,6 +121,27 @@ export function BmiForm({ onSubmit, isLoading }: BmiFormProps) {
           </div>
         </div>
 
+        {/* Live BMI Preview */}
+        {liveBmi && liveBmiCategory && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`flex items-center justify-between px-5 py-4 rounded-2xl border ${liveBmiCategory.color}`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="text-center">
+                <p className="text-2xl font-display font-bold">{liveBmi.toFixed(1)}</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">{t.bmiLive}</p>
+              </div>
+              <div className="w-px h-8 bg-current opacity-20" />
+              <p className="font-semibold text-sm">{liveBmiCategory.label}</p>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-current opacity-10 flex items-center justify-center">
+              <Calculator className="w-4 h-4" style={{ opacity: 1 }} />
+            </div>
+          </motion.div>
+        )}
+
         <div className="space-y-2">
           <label className="text-sm font-semibold text-foreground">{t.gender}</label>
           <select
@@ -128,6 +163,7 @@ export function BmiForm({ onSubmit, isLoading }: BmiFormProps) {
           <div className="flex flex-wrap gap-2">
             {healthIssueOptions.map(issue => {
               const isSelected = selectedIssues.includes(issue);
+              const label = t.healthIssueLabels[issue] ?? issue;
               return (
                 <button
                   key={issue}
@@ -139,7 +175,7 @@ export function BmiForm({ onSubmit, isLoading }: BmiFormProps) {
                       : 'bg-muted text-muted-foreground border-2 border-transparent hover:bg-muted/80'
                   }`}
                 >
-                  {issue}
+                  {label}
                 </button>
               );
             })}
