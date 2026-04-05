@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BmiForm } from './BmiForm';
 import { WorkoutTimer } from './WorkoutTimer';
@@ -19,8 +19,20 @@ export function SportSection() {
   const { t, lang } = useLanguage();
   const sportMutation = useGetSportRecommendation();
 
+  const lastFormData = useRef<any>(null);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return; }
+    if (!lastFormData.current || !recommendation) return;
+    sportMutation.mutateAsync({ data: { ...lastFormData.current, language: lang } })
+      .then(setRecommendation)
+      .catch(() => {});
+  }, [lang]);
+
   const handleFormSubmit = async (data: any) => {
     try {
+      lastFormData.current = data;
       setSubmittedWeight(data.weight);
       setSubmittedHeight(data.height);
       const result = await sportMutation.mutateAsync({ data: { ...data, language: lang } });
