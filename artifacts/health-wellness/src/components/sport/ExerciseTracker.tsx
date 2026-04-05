@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { X, CheckCircle2, ChevronRight, SkipForward, Volume2, VolumeX } from 'lucide-react';
+import { X, CheckCircle2, ChevronRight, SkipForward } from 'lucide-react';
 import { HomeExercise } from '@workspace/api-client-react';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -29,7 +29,6 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
   const [phase, setPhase] = useState<Phase>('active');
   const [restLeft, setRestLeft] = useState(REST_DUR);
   const [timerLeft, setTimerLeft] = useState<number | null>(null);
-  const [voiceOn, setVoiceOn] = useState(true);
 
   const ex = exercises[exIdx];
   const totalSets = ex.sets;
@@ -37,49 +36,32 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
   const isTimeBased = timeSec !== null;
 
   // Always-fresh snapshot — updated every render so the interval tick never sees stale state
-  const snap = useRef({ phase, timerLeft, restLeft, setsCompleted, totalSets, isTimeBased, timeSec, voiceOn, lang, ex, exIdx });
-  snap.current = { phase, timerLeft, restLeft, setsCompleted, totalSets, isTimeBased, timeSec, voiceOn, lang, ex, exIdx };
-
-  // ── Voice ──────────────────────────────────────────────────────────────
-  function speak(text: string) {
-    if (!snap.current.voiceOn) return;
-    try {
-      window.speechSynthesis?.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = snap.current.lang === 'ar' ? 'ar-SA' : 'en-US';
-      u.rate = 0.9;
-      window.speechSynthesis?.speak(u);
-    } catch {}
-  }
+  const snap = useRef({ phase, timerLeft, restLeft, setsCompleted, totalSets, isTimeBased, timeSec, lang, ex, exIdx });
+  snap.current = { phase, timerLeft, restLeft, setsCompleted, totalSets, isTimeBased, timeSec, lang, ex, exIdx };
 
   // ── Actions (always read from snap so they're never stale) ─────────────
   function completeSet() {
-    const { setsCompleted, totalSets, lang, ex } = snap.current;
+    const { setsCompleted, totalSets } = snap.current;
     const next = setsCompleted + 1;
     setSetsCompleted(next);
     if (next >= totalSets) {
       setPhase('exdone');
-      speak(lang === 'ar' ? 'اكتمل التمرين!' : 'Exercise complete!');
     } else {
       setPhase('resting');
       setRestLeft(REST_DUR);
-      speak(lang === 'ar' ? 'مجموعة مكتملة. استرح.' : 'Set complete. Rest.');
     }
   }
 
   function beginNextSet() {
-    const { setsCompleted, isTimeBased, timeSec, lang } = snap.current;
-    const nextNum = setsCompleted + 2;
-    speak(lang === 'ar' ? `ابدأ المجموعة ${nextNum}` : `Begin set ${nextNum}`);
+    const { isTimeBased, timeSec } = snap.current;
     setPhase('active');
     if (isTimeBased && timeSec) setTimerLeft(timeSec);
   }
 
   function goNextExercise() {
-    const { exIdx, lang } = snap.current;
+    const { exIdx } = snap.current;
     if (exIdx + 1 >= exercises.length) {
       setPhase('alldone');
-      speak(lang === 'ar' ? 'أحسنت! أكملت جميع التمارين!' : 'Amazing! You completed all exercises!');
     } else {
       const nextIdx = exIdx + 1;
       const nextEx = exercises[nextIdx];
@@ -87,13 +69,7 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
       setExIdx(nextIdx);
       setSetsCompleted(0);
       setPhase('active');
-      const nextTimeBased = nextTimeSec !== null;
-      setTimerLeft(nextTimeBased ? nextTimeSec : null);
-      speak(
-        lang === 'ar'
-          ? `المجموعة 1 من ${nextEx.sets}. ${nextEx.name}`
-          : `Set 1 of ${nextEx.sets}. ${nextEx.name}`
-      );
+      setTimerLeft(nextTimeSec !== null ? nextTimeSec : null);
     }
   }
 
@@ -104,7 +80,6 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
 
     if (phase === 'active' && isTimeBased && timerLeft !== null && timerLeft > 0) {
       if (timerLeft === 1) {
-        // Last tick — complete the set
         setTimerLeft(0);
         completeSet();
       } else {
@@ -125,12 +100,8 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
     return () => clearInterval(id);
   }, []);
 
-  // Initial announcement + timer seed
+  // Seed the timer for the first exercise if time-based
   useEffect(() => {
-    speak(lang === 'ar'
-      ? `المجموعة 1 من ${totalSets}. ${ex.name}`
-      : `Set 1 of ${totalSets}. ${ex.name}`
-    );
     if (isTimeBased && timeSec) setTimerLeft(timeSec);
   }, []);
 
@@ -165,20 +136,12 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
             </p>
             <h3 className="text-lg font-bold text-foreground mt-0.5 truncate">{ex.name}</h3>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => { setVoiceOn(v => { if (v) window.speechSynthesis?.cancel(); return !v; }); }}
-              className="w-9 h-9 rounded-full bg-background/60 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {voiceOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={onClose}
-              className="w-9 h-9 rounded-full bg-background/60 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-full bg-background/60 flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         <div className="p-6 space-y-5">
