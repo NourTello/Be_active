@@ -52,15 +52,15 @@ export function FoodSection() {
         )}
       </AnimatePresence>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Scanner & Form */}
-        <div className="lg:col-span-4 space-y-8">
+      <div className="flex flex-col gap-8">
+        {/* Scanner & Form */}
+        <div className="w-full space-y-8">
           <FoodScanner />
           <MealPlanForm onSubmit={handleFormSubmit} isLoading={foodMutation.isPending} />
         </div>
 
-        {/* Right Column: Meal Plan Results */}
-        <div className="lg:col-span-8">
+        {/* Meal Plan Results */}
+        <div className="w-full">
           <AnimatePresence mode="wait">
             {mealPlan && (
               <motion.div

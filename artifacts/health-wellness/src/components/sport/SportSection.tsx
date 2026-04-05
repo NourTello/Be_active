@@ -51,14 +51,14 @@ export function SportSection() {
         <p className="text-lg text-muted-foreground">{t.discoverSubtitle}</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="flex flex-col gap-8">
         {/* Form Column */}
-        <div className="lg:col-span-5">
+        <div className="w-full">
           <BmiForm onSubmit={handleFormSubmit} isLoading={sportMutation.isPending} />
         </div>
 
         {/* Results Column */}
-        <div className="lg:col-span-7">
+        <div className="w-full">
           <AnimatePresence mode="wait">
             {recommendation && !activeSport && (
               <motion.div 
