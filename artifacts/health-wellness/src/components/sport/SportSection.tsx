@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BmiForm } from './BmiForm';
 import { WorkoutTimer } from './WorkoutTimer';
+import { ExerciseTracker } from './ExerciseTracker';
 import { useGetSportRecommendation, SportRecommendationResponse, SportRecommendation } from '@workspace/api-client-react';
 import { Activity, AlertTriangle, ArrowRight, CheckCircle2, Flame, Timer, Target, TrendingDown, TrendingUp, Minus, Home, Dumbbell } from 'lucide-react';
 import { useUserProfile, calcTargetWeight } from '@/context/UserProfileContext';
@@ -12,6 +13,7 @@ export function SportSection() {
   const [activeSport, setActiveSport] = useState<SportRecommendation | null>(null);
   const [submittedWeight, setSubmittedWeight] = useState<number | null>(null);
   const [submittedHeight, setSubmittedHeight] = useState<number | null>(null);
+  const [trackerIndex, setTrackerIndex] = useState<number | null>(null);
 
   const { updateProfile } = useUserProfile();
   const { t, lang } = useLanguage();
@@ -253,7 +255,7 @@ export function SportSection() {
                             </div>
 
                             {ex.targetMuscles && ex.targetMuscles.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5">
+                              <div className="flex flex-wrap gap-1.5 mb-4">
                                 {ex.targetMuscles.map((m, i) => (
                                   <span key={i} className="px-2 py-0.5 bg-accent/10 text-accent rounded-full text-xs font-medium">
                                     {m}
@@ -261,6 +263,12 @@ export function SportSection() {
                                 ))}
                               </div>
                             )}
+                            <button
+                              onClick={() => setTrackerIndex(idx)}
+                              className="w-full py-2.5 bg-accent text-white font-bold rounded-xl text-sm flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow shadow-accent/30 hover:shadow-md hover:shadow-accent/40"
+                            >
+                              ▶ {lang === 'ar' ? 'ابدأ التمرين' : 'Start Exercise'}
+                            </button>
                           </motion.div>
                         );
                       })}
@@ -275,6 +283,14 @@ export function SportSection() {
                 key="timer" 
                 sport={activeSport} 
                 onClose={() => setActiveSport(null)} 
+              />
+            )}
+            {trackerIndex !== null && recommendation?.homeExercises && recommendation.homeExercises.length > 0 && (
+              <ExerciseTracker
+                key="exerciseTracker"
+                exercises={recommendation.homeExercises}
+                startIndex={trackerIndex}
+                onClose={() => setTrackerIndex(null)}
               />
             )}
           </AnimatePresence>
