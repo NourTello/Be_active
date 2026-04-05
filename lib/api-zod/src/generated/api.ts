@@ -91,6 +91,7 @@ export const GetFoodRecommendationResponse = zod.object({
  */
 export const AnalyzeFoodImageBody = zod.object({
   imageBase64: zod.string().describe("Base64 encoded image data"),
+  language: zod.string().optional().describe("Response language, e.g. en or ar"),
 });
 
 export const AnalyzeFoodImageResponse = zod.object({

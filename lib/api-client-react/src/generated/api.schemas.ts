@@ -104,6 +104,8 @@ export interface FoodRecommendationResponse {
 export interface FoodImageAnalysisRequest {
   /** Base64 encoded image data */
   imageBase64: string;
+  /** Response language, e.g. en or ar */
+  language?: string;
 }
 
 export interface DetectedFood {

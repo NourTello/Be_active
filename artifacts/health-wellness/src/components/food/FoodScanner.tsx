@@ -21,7 +21,7 @@ export function FoodScanner() {
   const [expandedIngredients, setExpandedIngredients] = useState<number | null>(null);
   const [showCamera, setShowCamera] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const analyzeMutation = useAnalyzeFoodImage();
 
@@ -45,7 +45,7 @@ export function FoodScanner() {
 
   const analyzeImage = async (base64String: string) => {
     try {
-      const result = await analyzeMutation.mutateAsync({ data: { imageBase64: base64String } });
+      const result = await analyzeMutation.mutateAsync({ data: { imageBase64: base64String, language: lang } });
       setAnalysis(result);
     } catch (error) {
       console.error('Failed to analyze image', error);
@@ -199,9 +199,9 @@ export function FoodScanner() {
                     </div>
 
                     {analysis.advice && (
-                      <div className="flex gap-3 p-4 bg-secondary/10 rounded-xl text-secondary-foreground text-sm">
+                      <div className="flex gap-3 p-4 bg-secondary/10 rounded-xl text-sm">
                         <Info className="w-5 h-5 shrink-0 text-secondary" />
-                        <p>{analysis.advice}</p>
+                        <p className="text-black dark:text-black">{analysis.advice}</p>
                       </div>
                     )}
                   </div>

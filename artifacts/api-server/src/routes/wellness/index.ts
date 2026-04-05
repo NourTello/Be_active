@@ -169,11 +169,15 @@ Provide 4 meal types: Breakfast, Lunch, Dinner, and Snack. Each meal should have
 router.post("/wellness/analyze-food-image", async (req, res) => {
   try {
     const body = AnalyzeFoodImageBody.parse(req.body);
-    const { imageBase64 } = body;
+    const { imageBase64, language } = body;
 
     const imageUrl = imageBase64.startsWith("data:")
       ? imageBase64
       : `data:image/jpeg;base64,${imageBase64}`;
+
+    const scanLangInstruction = language === "ar"
+      ? "IMPORTANT: Respond entirely in Arabic. All food names, portions, ingredients, and the advice field must be written in Arabic."
+      : "Respond in English.";
 
     const completion = await openai.chat.completions.create({
       model: "gpt-5.2",
@@ -189,6 +193,8 @@ router.post("/wellness/analyze-food-image", async (req, res) => {
             {
               type: "text",
               text: `Analyze this food image and identify all food items visible. For each food, estimate calories, macronutrients and list the main ingredients.
+
+${scanLangInstruction}
 
 Respond ONLY with valid JSON (no markdown) in this exact format:
 {
