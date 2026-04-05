@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion } from 'framer-motion';
-import { Activity, Calculator, Heart, Scale } from 'lucide-react';
+import { Activity, Calculator, Heart, Scale, User } from 'lucide-react';
 import { useUserProfile } from '@/context/UserProfileContext';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -15,6 +15,7 @@ const healthIssueOptions = [
 const formSchema = z.object({
   weight: z.coerce.number().min(30, 'Weight seems too low').max(300, 'Weight seems too high'),
   height: z.coerce.number().min(100, 'Height seems too low').max(250, 'Height seems too high'),
+  age: z.coerce.number().min(5, 'Age seems too low').max(120, 'Age seems too high'),
   gender: z.enum(['male', 'female', 'other'] as const),
   healthIssues: z.array(z.string()).default([]),
   fitnessGoal: z.string().optional(),
@@ -43,6 +44,7 @@ export function BmiForm({ onSubmit, isLoading }: BmiFormProps) {
     defaultValues: {
       weight: profile.weight || undefined,
       height: profile.height || undefined,
+      age: profile.age || undefined,
       gender: profile.gender || undefined,
       healthIssues: profile.healthIssues || [],
       fitnessGoal: 'stay active',
@@ -62,6 +64,7 @@ export function BmiForm({ onSubmit, isLoading }: BmiFormProps) {
     updateProfile({
       weight: data.weight,
       height: data.height,
+      age: data.age,
       gender: data.gender,
       healthIssues: data.healthIssues,
     });
@@ -93,7 +96,7 @@ export function BmiForm({ onSubmit, isLoading }: BmiFormProps) {
       </div>
 
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Scale className="w-4 h-4 text-primary" /> {t.weight}
@@ -118,6 +121,19 @@ export function BmiForm({ onSubmit, isLoading }: BmiFormProps) {
               placeholder="e.g. 175"
             />
             {errors.height && <p className="text-destructive text-xs font-medium">{errors.height.message}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <User className="w-4 h-4 text-primary" /> {t.age}
+            </label>
+            <input
+              {...register('age')}
+              type="number" step="1"
+              className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none text-foreground"
+              placeholder="e.g. 30"
+            />
+            {errors.age && <p className="text-destructive text-xs font-medium">{errors.age.message}</p>}
           </div>
         </div>
 
