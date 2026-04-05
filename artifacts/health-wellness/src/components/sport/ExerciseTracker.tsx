@@ -22,7 +22,7 @@ const REST_DUR = 15;
 type Phase = 'active' | 'resting' | 'exdone' | 'alldone';
 
 export function ExerciseTracker({ exercises, startIndex = 0, onClose }: ExerciseTrackerProps) {
-  const { lang, t } = useLanguage();
+  const { lang } = useLanguage();
 
   const [exIdx, setExIdx] = useState(startIndex);
   const [setsCompleted, setSetsCompleted] = useState(0);
@@ -31,123 +31,119 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
   const [timerLeft, setTimerLeft] = useState<number | null>(null);
   const [voiceOn, setVoiceOn] = useState(true);
 
-  const voiceRef = useRef(voiceOn);
-  voiceRef.current = voiceOn;
-  const langRef = useRef(lang);
-  langRef.current = lang;
-
   const ex = exercises[exIdx];
   const totalSets = ex.sets;
   const timeSec = parseSeconds(ex.reps);
   const isTimeBased = timeSec !== null;
 
+  // Always-fresh snapshot — updated every render so the interval tick never sees stale state
+  const snap = useRef({ phase, timerLeft, restLeft, setsCompleted, totalSets, isTimeBased, timeSec, voiceOn, lang, ex, exIdx });
+  snap.current = { phase, timerLeft, restLeft, setsCompleted, totalSets, isTimeBased, timeSec, voiceOn, lang, ex, exIdx };
+
+  // ── Voice ──────────────────────────────────────────────────────────────
   function speak(text: string) {
-    if (!voiceRef.current) return;
+    if (!snap.current.voiceOn) return;
     try {
       window.speechSynthesis?.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = langRef.current === 'ar' ? 'ar-SA' : 'en-US';
+      u.lang = snap.current.lang === 'ar' ? 'ar-SA' : 'en-US';
       u.rate = 0.9;
       window.speechSynthesis?.speak(u);
     } catch {}
   }
 
-  function announcePhase(p: Phase, sc: number, name: string) {
-    if (p === 'active') {
-      const setNum = sc + 1;
-      lang === 'ar'
-        ? speak(`المجموعة ${setNum} من ${totalSets}. ${name}`)
-        : speak(`Set ${setNum} of ${totalSets}. ${name}`);
-    } else if (p === 'resting') {
-      speak(lang === 'ar' ? 'مجموعة مكتملة. استرح.' : 'Set complete. Rest.');
-    } else if (p === 'exdone') {
-      speak(lang === 'ar' ? 'اكتمل التمرين!' : 'Exercise complete!');
-    } else if (p === 'alldone') {
-      speak(lang === 'ar' ? 'أحسنت! أكملت جميع التمارين!' : 'Amazing! You completed all exercises!');
-    }
-  }
-
-  function transitionPhase(newPhase: Phase, sc: number) {
-    setPhase(newPhase);
-    announcePhase(newPhase, sc, ex.name);
-    if (newPhase === 'active') {
-      if (isTimeBased && timeSec) setTimerLeft(timeSec);
-    }
-    if (newPhase === 'resting') {
-      setRestLeft(REST_DUR);
-    }
-  }
-
-  function handleSetComplete() {
+  // ── Actions (always read from snap so they're never stale) ─────────────
+  function completeSet() {
+    const { setsCompleted, totalSets, lang, ex } = snap.current;
     const next = setsCompleted + 1;
     setSetsCompleted(next);
     if (next >= totalSets) {
-      transitionPhase('exdone', next);
+      setPhase('exdone');
+      speak(lang === 'ar' ? 'اكتمل التمرين!' : 'Exercise complete!');
     } else {
-      transitionPhase('resting', next);
+      setPhase('resting');
+      setRestLeft(REST_DUR);
+      speak(lang === 'ar' ? 'مجموعة مكتملة. استرح.' : 'Set complete. Rest.');
     }
   }
 
   function beginNextSet() {
-    const nextSetNum = setsCompleted + 2;
-    lang === 'ar' ? speak(`ابدأ المجموعة ${nextSetNum}`) : speak(`Begin set ${nextSetNum}`);
+    const { setsCompleted, isTimeBased, timeSec, lang } = snap.current;
+    const nextNum = setsCompleted + 2;
+    speak(lang === 'ar' ? `ابدأ المجموعة ${nextNum}` : `Begin set ${nextNum}`);
     setPhase('active');
     if (isTimeBased && timeSec) setTimerLeft(timeSec);
   }
 
-  function handleNextExercise() {
+  function goNextExercise() {
+    const { exIdx, lang } = snap.current;
     if (exIdx + 1 >= exercises.length) {
       setPhase('alldone');
-      announcePhase('alldone', 0, '');
+      speak(lang === 'ar' ? 'أحسنت! أكملت جميع التمارين!' : 'Amazing! You completed all exercises!');
     } else {
       const nextIdx = exIdx + 1;
       const nextEx = exercises[nextIdx];
+      const nextTimeSec = parseSeconds(nextEx.reps);
       setExIdx(nextIdx);
       setSetsCompleted(0);
-      setTimerLeft(null);
       setPhase('active');
-      announcePhase('active', 0, nextEx.name);
-      if (parseSeconds(nextEx.reps) !== null) setTimerLeft(parseSeconds(nextEx.reps));
+      const nextTimeBased = nextTimeSec !== null;
+      setTimerLeft(nextTimeBased ? nextTimeSec : null);
+      speak(
+        lang === 'ar'
+          ? `المجموعة 1 من ${nextEx.sets}. ${nextEx.name}`
+          : `Set 1 of ${nextEx.sets}. ${nextEx.name}`
+      );
     }
   }
 
+  // ── Single stable interval — tick reads fresh state from snap ───────────
+  const tickRef = useRef<() => void>(() => {});
+  tickRef.current = () => {
+    const { phase, isTimeBased, timerLeft, restLeft } = snap.current;
+
+    if (phase === 'active' && isTimeBased && timerLeft !== null && timerLeft > 0) {
+      // Voice countdown for last 5 seconds
+      if (timerLeft <= 5) speak(String(timerLeft));
+
+      if (timerLeft === 1) {
+        // Last tick — complete the set
+        setTimerLeft(0);
+        completeSet();
+      } else {
+        setTimerLeft(timerLeft - 1);
+      }
+    } else if (phase === 'resting' && restLeft > 0) {
+      if (restLeft === 1) {
+        setRestLeft(0);
+        beginNextSet();
+      } else {
+        setRestLeft(restLeft - 1);
+      }
+    }
+  };
+
   useEffect(() => {
-    announcePhase('active', 0, ex.name);
+    const id = setInterval(() => tickRef.current(), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Initial announcement + timer seed
+  useEffect(() => {
+    speak(lang === 'ar'
+      ? `المجموعة 1 من ${totalSets}. ${ex.name}`
+      : `Set 1 of ${totalSets}. ${ex.name}`
+    );
     if (isTimeBased && timeSec) setTimerLeft(timeSec);
   }, []);
 
-  useEffect(() => {
-    if (phase !== 'active' || !isTimeBased || timerLeft === null || timerLeft <= 0) return;
-    if (timerLeft <= 5 && timerLeft > 0) speak(String(timerLeft));
-    const id = setTimeout(() => {
-      setTimerLeft(prev => {
-        const next = (prev ?? 1) - 1;
-        if (next <= 0) {
-          setTimeout(() => handleSetComplete(), 0);
-        }
-        return next;
-      });
-    }, 1000);
-    return () => clearTimeout(id);
-  }, [timerLeft, phase]);
-
-  useEffect(() => {
-    if (phase !== 'resting' || restLeft <= 0) return;
-    if (restLeft === 0) { beginNextSet(); return; }
-    const id = setTimeout(() => {
-      setRestLeft(prev => {
-        if (prev <= 1) { setTimeout(() => beginNextSet(), 0); return 0; }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearTimeout(id);
-  }, [restLeft, phase]);
-
+  // ── Helpers ─────────────────────────────────────────────────────────────
   const formatTime = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
   const isRTL = lang === 'ar';
 
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -176,7 +172,6 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
             <button
               onClick={() => { setVoiceOn(v => { if (v) window.speechSynthesis?.cancel(); return !v; }); }}
               className="w-9 h-9 rounded-full bg-background/60 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-              title={voiceOn ? 'Mute voice' : 'Unmute voice'}
             >
               {voiceOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
@@ -190,7 +185,8 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
         </div>
 
         <div className="p-6 space-y-5">
-          {/* Set progress bar */}
+
+          {/* Set progress */}
           {phase !== 'alldone' && (
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -230,7 +226,7 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
           )}
 
           {/* ── ACTIVE: TIME-BASED ── */}
-          {phase === 'active' && isTimeBased && timerLeft !== null && (
+          {phase === 'active' && isTimeBased && (
             <div className="flex flex-col items-center gap-4">
               <p className="text-sm text-muted-foreground text-center leading-relaxed">{ex.description}</p>
               <div className="relative w-40 h-40">
@@ -240,17 +236,25 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
                     cx="70" cy="70" r="60" fill="none" stroke="currentColor" strokeWidth="9"
                     strokeLinecap="round"
                     strokeDasharray={2 * Math.PI * 60}
-                    strokeDashoffset={2 * Math.PI * 60 * (1 - timerLeft / (timeSec ?? 1))}
-                    className="text-accent transition-all duration-1000"
+                    strokeDashoffset={
+                      timerLeft !== null && timeSec
+                        ? 2 * Math.PI * 60 * (1 - timerLeft / timeSec)
+                        : 0
+                    }
+                    className="text-accent transition-all duration-900"
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-4xl font-display font-bold text-foreground tabular-nums">{formatTime(timerLeft)}</span>
-                  <span className="text-xs text-muted-foreground mt-1">{lang === 'ar' ? 'ثانية' : 'remaining'}</span>
+                  <span className="text-4xl font-display font-bold text-foreground tabular-nums">
+                    {timerLeft !== null ? formatTime(timerLeft) : formatTime(timeSec ?? 0)}
+                  </span>
+                  <span className="text-xs text-muted-foreground mt-1">
+                    {lang === 'ar' ? 'متبقي' : 'remaining'}
+                  </span>
                 </div>
               </div>
               <button
-                onClick={handleSetComplete}
+                onClick={completeSet}
                 className="w-full py-4 bg-accent text-white font-bold text-base rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-accent/30"
               >
                 <CheckCircle2 className="w-5 h-5" />
@@ -264,11 +268,13 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground leading-relaxed">{ex.description}</p>
               <div className="bg-accent/10 rounded-2xl px-5 py-5 text-center">
-                <p className="text-xs font-bold text-accent uppercase tracking-widest mb-1">{t.reps}</p>
+                <p className="text-xs font-bold text-accent uppercase tracking-widest mb-1">
+                  {lang === 'ar' ? 'تكرارات' : 'Reps'}
+                </p>
                 <p className="text-4xl font-display font-bold text-foreground">{ex.reps}</p>
               </div>
               <button
-                onClick={handleSetComplete}
+                onClick={completeSet}
                 className="w-full py-4 bg-accent text-white font-bold text-base rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-accent/30"
               >
                 <CheckCircle2 className="w-5 h-5" />
@@ -291,7 +297,7 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
                     strokeLinecap="round"
                     strokeDasharray={2 * Math.PI * 50}
                     strokeDashoffset={2 * Math.PI * 50 * (restLeft / REST_DUR)}
-                    className="text-green-500 transition-all duration-1000"
+                    className="text-green-500 transition-all duration-900"
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -313,13 +319,15 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
           {phase === 'exdone' && (
             <div className="flex flex-col items-center gap-4 py-3 text-center">
               <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-4xl animate-bounce">🎉</div>
-              <p className="text-xl font-bold text-foreground">{lang === 'ar' ? 'اكتمل التمرين!' : 'Exercise Complete!'}</p>
+              <p className="text-xl font-bold text-foreground">
+                {lang === 'ar' ? 'اكتمل التمرين!' : 'Exercise Complete!'}
+              </p>
               <p className="text-sm text-muted-foreground">
                 {lang === 'ar' ? `أتممت ${setsCompleted} مجموعات` : `${setsCompleted} sets completed`}
               </p>
               {exIdx + 1 < exercises.length ? (
                 <button
-                  onClick={handleNextExercise}
+                  onClick={goNextExercise}
                   className="w-full py-4 bg-accent text-white font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-accent/30"
                 >
                   {lang === 'ar' ? 'التمرين التالي' : 'Next Exercise'}
@@ -327,7 +335,7 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
                 </button>
               ) : (
                 <button
-                  onClick={handleNextExercise}
+                  onClick={goNextExercise}
                   className="w-full py-4 bg-green-500 text-white font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-green-500/30"
                 >
                   {lang === 'ar' ? 'إنهاء جميع التمارين 🏆' : 'Finish All Exercises 🏆'}
@@ -357,6 +365,7 @@ export function ExerciseTracker({ exercises, startIndex = 0, onClose }: Exercise
               </button>
             </div>
           )}
+
         </div>
       </motion.div>
     </motion.div>
